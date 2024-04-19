@@ -6,7 +6,7 @@ The demo sets up a local Kubernetes cluster using Kind and configures it with In
 
 ### Install dependencies
 
-While it's developed on Ubuntu 22, it's designed to work across Linux distributions and macOS environments provided the necessary dependencies are installed.
+This demo is developed on Ubuntu 22 but is designed to be compatible with various Linux distributions and macOS, assuming the necessary dependencies are installed.
 
 **dependencies:**
 - docker
@@ -15,16 +15,18 @@ While it's developed on Ubuntu 22, it's designed to work across Linux distributi
 - kubectl-argo-rollouts
 - **uuidgen** (this tool will be needed only if OS is not linux)
 
-for ubuntu distributions `make install_deps` can be used to install dependencies.
+For Ubuntu distributions, you can use make install_deps to automatically install these dependencies.
+
 ```
 $ make install_deps
 Checking and installing required packages...
 Docker is already installed
 Kind is already installed
-Argo rollouts is already installed
+kubectl is already installed
+Argo Rollouts plugin is already installed
 ```
 
-"If you're using a Linux distribution other than Ubuntu or macOS, you can refer to the official documentation to install the following tools:
+If you're using a Linux distribution other than Ubuntu or macOS, refer to the official documentation to install the necessary tools:
 
 - Docker: Follow the Docker installation guide for your distribution [here](https://docs.docker.com/engine/install/)
 - Kind: Refer to the Kind documentation for installation instructions on different platforms [here](https://kind.sigs.k8s.io/docs/user/quick-start/).
