@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: blue-green-app-rollout
+spec:
+  replicas: 3
+  analysis:
+    successfulRunHistoryLimit: 3
+    unsuccessfulRunHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: blue-green-app
+  template:
+    metadata:
+      labels:
+        app: blue-green-app
+    spec:
+      containers:
+      - name: app
+        image: blue-demo-image:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+  strategy:
+    blueGreen:
+      activeService: blue-svc
+      previewService: green-svc
+      previewReplicaCount: 2
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 1
+      scaleDownDelaySeconds: 30
