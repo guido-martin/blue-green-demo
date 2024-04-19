@@ -14,7 +14,7 @@ install_deps:
 		echo "Docker is already installed"; \
 	fi
 
-	@# Check if Kind (Kubernetes in Docker) is installed
+	@# Check if Kind is installed
 	@if ! command -v kind &> /dev/null; then \
 		echo "Kind not found, installing..."; \
 		go install sigs.k8s.io/kind@latest; \
@@ -22,14 +22,24 @@ install_deps:
 		echo "Kind is already installed"; \
 	fi
 
-	@# Check if Kind (Kubernetes in Docker) is installed
+	@# Check if kubectl is installed
+	@if ! command -v kubectl &> /dev/null; then \
+		echo "kubectl not found, installing..."; \
+		curl -LO https://dl.k8s.io/release/$(shell curl -s https://cdn.dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl; \
+		chmod +x ./kubectl; \
+		sudo mv ./kubectl /usr/local/bin/kubectl; \
+	else \
+		echo "kubectl is already installed"; \
+	fi
+
+	@# Check if Argo Rollouts plugin for kubectl is installed
 	@if ! command -v kubectl-argo-rollouts &> /dev/null; then \
 		echo "Argo Rollouts plugin not found, installing..."; \
 		curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64; \
 		chmod +x ./kubectl-argo-rollouts-linux-amd64; \
 		sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts; \
 	else \
-		echo "Argo rollouts is already installed"; \
+		echo "Argo Rollouts plugin is already installed"; \
 	fi
 
 cluster:
