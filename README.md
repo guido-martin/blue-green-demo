@@ -98,7 +98,7 @@ The rollout status will appear as "Degraded" after the status is flagged as "Err
 
 ![Pre Promotion Analysis Degraded](img/prePromotionFailed.png)
 
-This demonstration showcases how the prePromotionAnalysis can detect issues and prevent automatic promotion, allowing you to observe the impact of failures on the rollout's status and behavior. Adjust the analysis criteria and handling based on your specific deployment requirements and error scenarios
+This demonstration showcases how the prePromotionAnalysis can detect issues and prevent automatic promotion, allowing you to observe the impact of failures on the rollout's status and behavior.
 
 #### Step 5: Showcase Failure After Promotion
 
@@ -114,11 +114,11 @@ If you have **autoPromotionEnabled** set to false (as described in Step 3), you 
 make manual-promotion
 ```
 
-After approximately 12 seconds, the image will begin to return HTTP error 500 responses. This occurs after the pre-promotion analysis has been successfully completed and the preview service has been promoted to active. As a result, simulated requests will start to fail, triggering the post-promotion analysis to detect failures.
+After approximately 12 seconds, the image will begin to return HTTP error 500 responses. This occurs after the pre-promotion analysis has been successfully completed and the preview service has been promoted to active. As a result, simulated requests will start to fail and post-promotion analysis will detect failures.
 
 ![Post Promotion Analysis failing](img/postPromotionFailing.png)
 
-The image will begin to return HTTP error 500 responses before the post-promotion analysis is completed. Once the post-promotion analysis is flagged as an error, the active service will be rolled back to the previous working rollout version. As a result, the simulated requests will start to show successes again once the rollback is complete.
+Once the post-promotion analysis is flagged as an error, the active service will be rolled back to the previous working rollout version. As a result, the simulated requests will start to show successes again once the rollback is complete.
 
 ![Post Promotion Analysis Degraded](img/postPromotionFailed.png)
 
