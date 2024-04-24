@@ -2,8 +2,8 @@
 #
 SHELL := /bin/bash
 
-.PHONY: install_deps cluster delete_cluster target_kind blue-image green-image load-images deploy requests prepare_demo switch-image switch
 
+.PHONY: install_deps cluster delete_cluster target_kind blue-image green-image load-images deploy requests prepare_demo switch-image switch fail healthy manual-promotion enable_auto_promotion disable_auto_promotion fail_after_promotion
 install_deps:
 	@echo "Checking and installing required packages..."
 	@# Check if Docker is installed
@@ -80,7 +80,7 @@ deploy: target_kind
 prepare_demo: cluster install_argo load-images deploy ingress-nginx
 
 requests:
-		./bin/simulate-requests.sh 180
+		./bin/simulate-requests.sh 1000
 
 status:
 	@kubectl argo rollouts get rollout blue-green-app-rollout --watch
@@ -89,3 +89,30 @@ switch-image:
 	@./bin/switch-image.sh
 
 switch: switch-image status
+
+fail:
+	kubectl patch rollout blue-green-app-rollout \
+	  --namespace=default \
+		--type=json \
+		-p='[{"op": "add", "path": "/spec/template/spec/containers/0/env", "value": [{"name": "FAIL_AFTER_SECONDS", "value": "5"}]}]'
+
+fail_after_promotion:
+	kubectl patch rollout blue-green-app-rollout \
+		--namespace=default \
+		--type=json \
+		-p='[{"op": "add", "path": "/spec/template/spec/containers/0/env", "value": [{"name": "FAIL_AFTER_SECONDS", "value": "12"}]}]'
+
+healthy:
+	kubectl patch rollout blue-green-app-rollout \
+	  --namespace=default \
+		--type='json' \
+		-p='[{"op": "remove", "path": "/spec/template/spec/containers/0/env"}]'
+
+disable_auto_promotion:
+	kubectl patch rollout blue-green-app-rollout -p '{"spec":{"strategy":{"blueGreen":{"autoPromotionEnabled":false}}}}' --type=merge
+
+enable_auto_promotion:
+	kubectl patch rollout blue-green-app-rollout -p '{"spec":{"strategy":{"blueGreen":{"autoPromotionEnabled":true}}}}' --type=merge
+
+manual-promotion:
+		kubectl argo rollouts promote blue-green-app-rollout

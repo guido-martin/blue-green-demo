@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: http-check
+spec:
+  args:
+  - name: service-name
+  metrics:
+    - name: webmetric
+      failureCondition: result == ""
+      failureLimit: 1
+      count: 10
+      interval: 1s
+      provider:
+        web:
+          url: "http://{{ args.service-name }}.default.svc.cluster.local/"
+          timeoutSeconds: 2
+          jsonPath: "{$.version}"

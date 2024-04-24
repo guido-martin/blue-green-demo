@@ -3,10 +3,10 @@ kind: Rollout
 metadata:
   name: blue-green-app-rollout
 spec:
-  replicas: 3
+  replicas: 1
   analysis:
-    successfulRunHistoryLimit: 3
-    unsuccessfulRunHistoryLimit: 3
+    successfulRunHistoryLimit: 4
+    unsuccessfulRunHistoryLimit: 4
   selector:
     matchLabels:
       app: blue-green-app
@@ -23,11 +23,35 @@ spec:
         - name: http
           containerPort: 80
           protocol: TCP
+        livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 5
+            periodSeconds: 10
+        readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 5
+            periodSeconds: 10
   strategy:
     blueGreen:
       activeService: blue-svc
       previewService: green-svc
-      previewReplicaCount: 2
+      previewReplicaCount: 1
       autoPromotionEnabled: true
       autoPromotionSeconds: 1
       scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+        templates:
+        - templateName: http-check
+        args:
+        - name: service-name
+          value: green-svc
+      postPromotionAnalysis:
+        templates:
+        - templateName: http-check
+        args:
+        - name: service-name
+          value: green-svc
