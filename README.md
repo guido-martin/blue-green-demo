@@ -61,25 +61,96 @@ make requests
 
 The output will display the location targeted (a UUID) and the version (indicating blue or green) to which the request is connected
 
-#### Step 3: Switch Images and Monitor Rollout
+In a different terminal window, execute the following command to monitor the status of the rollout thought the demo
+```
+make status
+```
 
-In a different terminal window, execute the following command to switch back and forth between the blue and green versions, and monitor the status of the rollout:
+#### Step 3 (Optional): Toggle Auto Promotion to false
+
+By default, this Argo Rollouts demo is configured with `autoPromotionEnabled` set to true, which automatically promotes rollouts after successful completion of prePromotionAnalysis.
+
+To change this behavior and enable manual promotion using a command later in the demo, you can disable auto promotion by executing the following command:
+```
+make disable_auto_promotion
+```
+
+You can revert this setting at any point by executing:
+```
+make enable_auto_promotion
+```
+
+#### Step 4: Showcase Failure before promotion
+
+In this demonstration, we have configured prePromotionAnalysis and postPromotionAnalysis to assess the health of the service by conducting 10 HTTP requests and validating the presence of a version field. The success or failure of these analyses will determine the criteria for promotion and rollback.
+
+To simulate a scenario where prePromotionAnalysis fails, we will intentionally introduce a failure in our application after a few seconds. Execute the following command to make our application image fail after 5 seconds by setting the FAIL_AFTER_SECONDS environment variable in the Argo Rollout:
+
+```
+make fail
+```
+
+Use the make status command to monitor the analysis errors until the new version's status is flagged as "Degraded":
+
+![Pre Promotion Analysis Failing](img/prePromotionFailing.png)
+
+The rollout status will appear as "Degraded" after the status is flagged as "Error":
+
+![Pre Promotion Analysis Degraded](img/prePromotionFailed.png)
+
+This demonstration showcases how the prePromotionAnalysis can detect issues and prevent automatic promotion, allowing you to observe the impact of failures on the rollout's status and behavior. Adjust the analysis criteria and handling based on your specific deployment requirements and error scenarios
+
+#### Step 5: Showcase Failure After Promotion
+
+In this step, we will simulate a failure occurring after the promotion, allowing the prePromotionAnalysis to pass before encountering errors.
+
+To initiate the rollout failure after the pre-promotion analysis has run successfully, execute the following command:
+```
+make fail_after_promotion
+```
+
+If you have **autoPromotionEnabled** set to false (as described in Step 3), you will need to manually promote the image after the pre-promotion analysis finishes. Use the following command to perform manual promotion:
+```
+make manual-promotion
+```
+
+After approximately 12 seconds, the image will begin to return HTTP error 500 responses. This occurs after the pre-promotion analysis has been successfully completed and the preview service has been promoted to active. As a result, simulated requests will start to fail, triggering the post-promotion analysis to detect failures.
+
+![Post Promotion Analysis failing](img/postPromotionFailing.png)
+
+The image will begin to return HTTP error 500 responses before the post-promotion analysis is completed. Once the post-promotion analysis is flagged as an error, the active service will be rolled back to the previous working rollout version. As a result, the simulated requests will start to show successes again once the rollback is complete.
+
+![Post Promotion Analysis Degraded](img/postPromotionFailed.png)
+
+#### Step 6: Restore Health
+
+To restore the health of our rollout, we will remove the FAIL_AFTER_SECONDS environment variable from our configuration.
+
+Execute the following command to recover the healthiness of the rollout:
+```
+make healthy
+```
+
+#### Step 7: Showcase Successful Rollout
+
+To demonstrate a successful case, change the rollout image by executing the following command:
 ```
 make switch
 ````
 
-This command will display the progress of the rollout and provide updates on the current image version.  You can reuse the make switch command to continuously switch images and monitor changes.
+This command initiates the rollout process and provides updates on the progress of the image version change. You can reuse the make switch command to continuously switch images and monitor the rollout's evolution.
 
 ![Preview Rollout](img/preview.png)
 
+If you are running this demo with **autoPromotionEnabled** set to false, the rollout will be paused after the pre-promotion analysis succeeds. At this point, you will need to execute `make manual-promotion` to continue.
 
-#### Step 4: Completion
+![Paused](img/pause.png)
 
-After the image is rolled out and the blue service points to the new image, the preview pod will be marked as stable. At this point, you will start seeing the updated version in the request outputs.
+Once the post-promotion analysis is complete, the rollout will be flagged as stable
 
 ![Finished](img/rolled_out.png)
 
-#### Step 5: Clean Up
+#### Step 8: Clean Up
 
 Once you have completed the demo, use the following command to bring down the kind cluster and delete all associated resources:
 
